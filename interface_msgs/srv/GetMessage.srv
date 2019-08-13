@@ -1,0 +1,18 @@
+##
+# @File: GetMessage.srv
+# @Date: 12 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to get a message through the behavior.
+#
+# @message_name
+# The name of the message received
+#
+# @variables
+# A JSON representation of the variables included with the message
+##
+
+---
+string message_name
+string variables

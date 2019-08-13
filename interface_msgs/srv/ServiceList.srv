@@ -1,0 +1,14 @@
+##
+# @File: ServiceList.srv
+# @Date: 12 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# A list of services that a behavior offers for the user to interact with
+#
+# @services
+# The array of services that are offered
+##
+
+---
+interface_msgs/Service[] services

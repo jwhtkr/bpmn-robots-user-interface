@@ -1,0 +1,22 @@
+##
+# @File: SendMessage.srv
+# @Date: 12 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows a user to send a message
+#
+# @message_name
+# The name of the message to send
+#
+# @variables
+# The JSON variables to send with the message
+#
+# @success
+# Indicates if the call was successful
+##
+
+string message_name
+string variables
+---
+bool success

@@ -1,0 +1,18 @@
+##
+# @File: Complete.srv
+# @Date: 12 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to complete the behavior. The behavior may require variables.
+#
+# @variables
+# The variables (in JSON format) to return to BPMN as part of the complete. If not needed leave as null.
+#
+# @success
+# Indicates if the behavior completed successfully or not
+##
+
+string variables
+---
+bool success
