@@ -1,0 +1,26 @@
+##
+# @File: SetVariable.srv
+# @Date: 13 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to set a variable's value in the BPMN engine
+#
+# @name
+# Name of the variable to set
+#
+# @value
+# Value to set the variable to
+#
+# @type
+# The type of the variable value, can be boolean, bytes, short, integer, long, double, date, string, file, or object
+#
+# @success
+# Indicates the success of the operation
+##
+
+string name
+string value
+string type
+---
+bool success

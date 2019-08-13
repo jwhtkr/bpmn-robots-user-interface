@@ -1,0 +1,18 @@
+##
+# @File: GetVariables.srv
+# @Date: 13 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to get variables from the BPMN engine
+#
+# @variable_name
+# The name of the variable to get the value of
+#
+# @variable
+# The JSON object representing the variable. Empty string if unsuccessful.
+##
+
+string variable_name
+---
+string variable

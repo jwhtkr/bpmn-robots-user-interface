@@ -1,0 +1,22 @@
+##
+# @File: SendSignal.srv
+# @Date: 13 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to send a signal
+#
+# @name
+# Name of the signal to send
+#
+# @variables
+# JSON representation of the variables to send with the signal
+#
+# @success
+# Indication if sending the signal succeeded or not
+##
+
+string name
+string variables
+---
+bool success

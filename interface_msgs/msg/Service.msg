@@ -21,10 +21,10 @@
 # NULL corresponds to the "generic" service
 uint8 COMPLETE = 7
 uint8 GET_MESSAGE = 6
-uint8 GET_VARIABLES = 5
+uint8 GET_VARIABLE = 5
 uint8 SEND_MESSAGE = 4
 uint8 SENG_SIGNAL = 3
-uint8 SET_VARIABLES = 2
+uint8 SET_VARIABLE = 2
 uint8 THROW_ERROR = 1
 uint8 NULL = 0
 

@@ -1,0 +1,22 @@
+##
+# @File: ThrowError.srv
+# @Date: 13 August 2019
+# @Author: Justin Whitaker
+#
+# @Brief
+# Allows the user to throw a BPMN error
+#
+# @message
+# The message to include with the thrown error
+#
+# @variables
+# The variables, based on the template, to send to the BPMN engine in JSON format
+#
+# @success
+# Indicates the success of the operation
+##
+
+string message
+string variables
+---
+bool success
