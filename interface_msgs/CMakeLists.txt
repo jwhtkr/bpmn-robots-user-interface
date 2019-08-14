@@ -8,9 +8,7 @@ project(interface_msgs)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  std_msgs
-  architecture_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -57,11 +55,11 @@ add_service_files(
   FILES
   Complete.srv
   GetMessage.srv
-  GetVariables.srv
+  GetVariable.srv
   SendMessage.srv
   SendSignal.srv
   ServiceList.srv
-  SetVariables.srv
+  SetVariable.srv
   ThrowError.srv
 )
 
@@ -73,10 +71,10 @@ add_service_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  # DEPENDENCIES
+  # std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,7 +108,7 @@ add_service_files(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES behavior_listener
-#  CATKIN_DEPENDS rospy std_msgs
+ CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
