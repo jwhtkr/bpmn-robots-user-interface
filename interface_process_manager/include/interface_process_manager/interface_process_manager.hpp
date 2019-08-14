@@ -36,6 +36,7 @@
 #include<task_lock/task_lock.hpp>
 #include<error_handler/error_handler.hpp>
 #include<message_handler/message_handler.hpp>
+#include<process_variables/process_variable.hpp>
 
 /* Rest Headers */
 #include<cpprest/json.h>
@@ -69,6 +70,31 @@ namespace behavior_ui
     InterfaceProcessManager(InterfaceProcessManager&&) = delete;
     /**
      * @Constructor
+     *
+     * @brief
+     * This constructor calls the bass class BehaviorManager's constructor which fetches and
+     * locks a task, loads the config file of resources, asks the Resource Manager for those
+     * resources, as well as setup all base ROS connections and configure the ErrorHandler it
+     * holds. The only other thing that this constructor does is initialize it's local
+     * MessageHandler object.
+     * @base_uri: The URI of the camunda server
+     * @name: The string that will used to denote this behavior
+     * @priority: The priority of the behavior
+     * @camunda_topic: The camunda topic that this object will attempt to fetch and lock from
+     * @status_topic: ROS topic of a service that provides status updates from this object
+     * @get_resources_topic: ROS service topic that this object will use to ask the Resource
+     *                       Manager for resources
+     * @give_resources_topic: ROS service topic that this object will use to give the Resource
+     *                        Manager resources it's not using anymore
+     * @give_up_resources_topic: ROS service topic that the Resource Manager will use to take
+     *                           resources back from this object
+     * @modify_robots_topic: ROS service topic that this object will use to tell the Thread
+     *                       Pool Manager what resources to spin-up
+     * @config_file_path: The absolute path of this behavior's config file
+     * @variables: The variables you want to get in the fetch and lock. If left blank
+     *             Camunda will return all of the global variables
+     * @managing_rate: The frequency that this object will attempt to run all of its
+     *                 duties at least once
      **/
     InterfaceProcessManager(const std::string&              base_uri,
                             const std::string&              name,
@@ -85,16 +111,20 @@ namespace behavior_ui
     /**
      * @Deconstructor
      **/
-    ~InterfaceProcessManager() override;
+    ~InterfaceProcessManager() override = default;
     /**
      * @Assignment Operators
      **/
     InterfaceProcessManager& operator=(const InterfaceProcessManager&) = delete;
     InterfaceProcessManager& operator=(InterfaceProcessManager&&)      = delete;
     /**
-     * @get
+     * @getStatus
+     *
+     * @brief
+     * Returns some basic information about this Behavior Manager. It is recommended that
+     * base classes use this function to help fill out the name and managerStatus fields.
      **/
-    architecture_msgs::BehaviorStatus::Response::Ptr getStatus() const noexcept override;
+    architecture_msgs::BehaviorStatus::Response::Ptr getStatus() const noexcept override = 0;
     protected:
     /* Handles sending and receiving messages and sending signals */
     bpmn::MessageHandler message_handler;
@@ -108,6 +138,9 @@ namespace behavior_ui
     ros::ServiceServer set_variable_srv;
     /**
      * @Service Callbacks
+     *
+     * @brief
+     * Each callback defines the most basic version of what the services are.
      **/
     virtual bool service_list_callback(interface_msgs::ServiceList::Request&,
                                        interface_msgs::ServiceList::Response& res);
@@ -131,8 +164,11 @@ namespace behavior_ui
                                        interface_msgs::SetVariable::Response& res);
     /**
      * @runBehavior
+     *
+     * @brief
+     * This is where any behavior specific logic should go.
      **/
-    void runBehavior() override;
+    void runBehavior() override = 0;
   };
 
   template<typename TASK_LOCK, typename ERROR>
@@ -163,10 +199,11 @@ namespace behavior_ui
    message_handler(web::json::value(base_uri), behavior_manager::BehaviorManager<TASK_LOCK, ERROR>::task_lock.getWorkerId())
   {}
 
-  template<typename TASK_LOCK, typename ERROR>
-  InterfaceProcessManager<TASK_LOCK, ERROR>::~InterfaceProcessManager()
-  {
 
+  template<typename TASK_LOCK, typename ERROR>
+  architecture_msgs::BehaviorStatus::Response::Ptr InterfaceProcessManager<TASK_LOCK, ERROR>::getStatus() const noexcept
+  {
+    return this->BehaviorManager::getStatus();
   }
 
   template<typename TASK_LOCK, typename ERROR>
@@ -334,7 +371,76 @@ namespace behavior_ui
     return true;
   }
 
+  template<typename TASK_LOCK, typename ERROR>
+  bool InterfaceProcessManager<TASK_LOCK, ERROR>::get_variable_callback(interface_msgs::GetVariable::Request&  req,
+                                                                        interface_msgs::GetVariable::Response& res)
+  {
+    try
+    {
+      res.variable = this->task_lock.getResponsVars().at(req.name).serialize();
+    }
+    catch(const std::exception& ex)
+    {
+      ROS_ERROR("Behavior " + this->getName() + " failed to get the " + req.name + " variable because of this exception, " + ex.what());
+    }
+    return true;
+  }
 
+  template<typename TASK_LOCK, typename ERROR>
+  bool InterfaceProcessManager<TASK_LOCK, ERROR>::set_variable_callback(interface_msgs::SetVariable::Request&  req,
+                                                                        interface_msgs::SetVariable::Response& res)
+  {
+    try
+    {
+      if(interface_msgs::SetVariable::Request::STRING == req.type)
+      {
+        camunda::ProcessVariable<std::string> p_var(this->getBaseUri(), this->getInstanceId(), req.name);
+
+        p_var.update(req.value);
+      }
+      else if(interface_msgs::SetVariable::Request::INTEGER == req.type)
+      {
+        camunda::ProcessVariable<int64_t> p_var(this->getBaseUri(), this->getInstanceId(), req.name);
+
+        p_var.update(std::stol(req.value));
+      }
+      else if(interface_msgs::SetVariable::Request::DOUBLE == req.type)
+      {
+        camunda::ProcessVariable<double> p_var(this->getBaseUri(), this->getInstanceId(), req.name);
+
+        p_var.update(std::stod(req.value));
+      }
+      else if(interface_msgs::SetVariable::Request::BOOLEAN == req.type)
+      {
+        camunda::ProcessVariable<bool> p_var(this->getBaseUri(), this->getInstanceId(), req.name);
+
+        if("true" == req.value)
+        {
+          p_var.update(true);
+        }
+        else if("false" == req.value)
+        {
+          p_var.update(false);
+        }
+        else
+        {
+          throw std::runtime_error(req.value + " is not a boolean type.");
+        }
+      }
+    }
+    catch(const std::exception& ex)
+    {
+      res.success = false;
+      ROS_ERROR("Behavior " + this->getName() + " failed to set the " + req.name + " variable because of this exception " + ex.what());
+      return true;
+    }
+    res.success = true;
+    return true;
+  }
+
+  template<typename TASK_LOCK, typename ERROR>
+  void InterfaceProcessManager<TASK_LOCK, ERROR>::runBehavior()
+  {}
 
 }// behavior_ui
 

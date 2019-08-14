@@ -19,6 +19,18 @@
 # Indicates the success of the operation
 ##
 
+## Possible value types
+string BOOLEAN = "BOOLEAN"
+##string BYTES   = "BYTES"
+##string SHORT   = "SHORT"
+string INTEGER = "INTEGER"
+##string LONG    = "LONG"
+string DOUBLE  = "DOUBLE"
+###string DATE    = "DATE"
+string STRING  = "STRING"
+#string FILE    = "FILE"
+#string OBJECT  = "OBJECT"
+
 string name
 string value
 string type
