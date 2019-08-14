@@ -19,7 +19,6 @@ add_message_files(
 add_service_files(
   FILES
   Complete.srv
-  GetMessage.srv
   GetVariable.srv
   SendMessage.srv
   SendSignal.srv
