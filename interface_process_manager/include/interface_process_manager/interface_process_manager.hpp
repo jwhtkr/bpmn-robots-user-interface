@@ -79,7 +79,6 @@ namespace behavior_ui
      * MessageHandler object.
      * @base_uri: The URI of the camunda server
      * @name: The string that will used to denote this behavior
-     * @priority: The priority of the behavior
      * @camunda_topic: The camunda topic that this object will attempt to fetch and lock from
      * @status_topic: ROS topic of a service that provides status updates from this object
      * @get_resources_topic: ROS service topic that this object will use to ask the Resource
@@ -98,7 +97,6 @@ namespace behavior_ui
      **/
     InterfaceProcessManager(const std::string&              base_uri,
                             const std::string&              name,
-                            const uint8_t                   priority,
                             const std::string&              camunda_topic,
                             const std::string&              status_topic,
                             const std::string&              get_resources_topic,
@@ -174,7 +172,6 @@ namespace behavior_ui
   template<typename TASK_LOCK, typename ERROR>
   InterfaceProcessManager<TASK_LOCK, ERROR>::InterfaceProcessManager(const std::string&              base_uri,
                                                                      const std::string&              name,
-                                                                     const uint8_t                   priority,
                                                                      const std::string&              camunda_topic,
                                                                      const std::string&              status_topic,
                                                                      const std::string&              get_resources_topic,
@@ -186,7 +183,6 @@ namespace behavior_ui
                                                                      const uint32_t                  managing_rate)
    : behavior_manager::BehaviorManager<TASK_LOCK, ERROR>(base_uri,
                                                          name,
-                                                         priority,
                                                          camunda_topic,
                                                          status_topic,
                                                          get_resources_topic,
@@ -203,7 +199,7 @@ namespace behavior_ui
   template<typename TASK_LOCK, typename ERROR>
   architecture_msgs::BehaviorStatus::Response::Ptr InterfaceProcessManager<TASK_LOCK, ERROR>::getStatus() const noexcept
   {
-    return this->BehaviorManager::getStatus();
+    return this->behavior_manager::BehaviorManager<TASK_LOCK, ERROR>::getStatus();
   }
 
   template<typename TASK_LOCK, typename ERROR>
@@ -268,10 +264,10 @@ namespace behavior_ui
     {
       std::error_code error_code(0, std::generic_category());
 
-      this->task_lock.addVariables(web::json::value::parse(req.variables, error_code));
+      this->task_lock.addVariables(camunda::Variables(web::json::value::parse(req.variables, error_code)));
       if(0 != error_code.value())
       {
-        ROS_ERROR("Complete Json for " + this->getName() + " is incorrectly formatted.");
+        ROS_ERROR("Complete Json for %s is incorrectly formatted.", this->getName().c_str());
       }
     }
 
@@ -281,7 +277,7 @@ namespace behavior_ui
     }
     catch(const std::exception& ex)
     {
-      ROS_ERROR("Competition of " + this->getName() + " failed with this exception " + ex.what());
+      ROS_ERROR("Competition of %s failed with this exception  %s", this->getName().c_str(), ex.what());
       res.success = false;
       return true;
     }
@@ -298,18 +294,18 @@ namespace behavior_ui
     {
       std::error_code error_code(0, std::generic_category());
 
-      this->error_handler.ThrowError(req.message,
-                                     std::string(),
-                                     web::json::value::parse(req.variables, error_code));
+      this->error_handler.throwBpmnError(req.message,
+                                         std::string(),
+                                         camunda::Variables(web::json::value::parse(req.variables, error_code)));
 
       if(0 != error_code.value())
       {
-        ROS_ERROR("Error Json for " + this->getName() + " is incorrectly formatted.");
+        ROS_ERROR("Error Json for %s is incorrectly formatted.", this->getName().c_str());
       }
     }
     catch(const std::exception& ex)
     {
-      ROS_ERROR("Behavior " + this->getName() + " failed to throw an error with this exception " + ex.what());
+      ROS_ERROR("Behavior %s failed to throw an error with this exception %s", this->getName().c_str(), ex.what());
       res.success = false;
       return true;
     }
@@ -326,17 +322,17 @@ namespace behavior_ui
     {
       std::error_code error_code(0, std::generic_category());
 
-      this->message_handler.template SendMessage<camunda::Variables, camunda::Topics>(camunda::Variables(web::json::value::parse(req.variables, error_code)),
+      this->message_handler.template sendMessage<camunda::Variables, camunda::Topics>(camunda::Variables(web::json::value::parse(req.variables, error_code)),
                                                                                       camunda::Topics(req.message_name, 9999));
 
       if(0 != error_code.value())
       {
-        ROS_ERROR("Message Json for " + this->getName() + " is incorrectly formatted.");
+        ROS_ERROR("Message Json for %s is incorrectly formatted.", this->getName().c_str());
       }
     }
     catch(const std::exception& ex)
     {
-      ROS_ERROR("Behavior " + this->getName() + " failed to send a message with this exception " + ex.what());
+      ROS_ERROR("Behavior %s failed to send a message with this exception %s", this->getName().c_str(), ex.what());
       res.success = false;
       return true;
     }
@@ -357,12 +353,12 @@ namespace behavior_ui
 
       if(0 != error_code.value())
       {
-        ROS_ERROR("Signal Json for " + this->getName() + " is incorrectly formatted.");
+        ROS_ERROR("Signal Json for %s is incorrectly formatted.", this->getName().c_str());
       }
     }
     catch(const std::exception& ex)
     {
-      ROS_ERROR("Behavior " + this->getName() + " failed to send a signal with this exception " + ex.what());
+      ROS_ERROR("Behavior %s failed to send a signal with this exception %s", this->getName().c_str(), ex.what());
       res.success = false;
       return true;
     }
@@ -381,7 +377,7 @@ namespace behavior_ui
     }
     catch(const std::exception& ex)
     {
-      ROS_ERROR("Behavior " + this->getName() + " failed to get the " + req.name + " variable because of this exception, " + ex.what());
+      ROS_ERROR("Behavior %s failed to get the %s variable because of this exception, %s", this->getName().c_str(), req.name.c_str(), ex.what());
     }
     return true;
   }
@@ -431,7 +427,7 @@ namespace behavior_ui
     catch(const std::exception& ex)
     {
       res.success = false;
-      ROS_ERROR("Behavior " + this->getName() + " failed to set the " + req.name + " variable because of this exception " + ex.what());
+      ROS_ERROR("Behavior %s failed to set the %s variable because of this exception %s", this->getName().c_str(), req.name.c_str(), ex.what());
       return true;
     }
     res.success = true;

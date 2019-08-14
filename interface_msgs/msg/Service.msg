@@ -26,8 +26,9 @@ uint8 SEND_MESSAGE = 4
 uint8 SEND_SIGNAL = 3
 uint8 SET_VARIABLE = 2
 uint8 THROW_ERROR = 1
-uint8 NULL = 0
+uint8 NULL_TYPE = 0
 
 string name
 uint8 type
 string json_template
+

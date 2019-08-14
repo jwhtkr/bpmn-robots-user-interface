@@ -20,14 +20,10 @@
 ##
 
 ## Possible value types
-string BOOLEAN = "BOOLEAN"
-##string BYTES   = "BYTES"
-##string SHORT   = "SHORT"
-string INTEGER = "INTEGER"
-##string LONG    = "LONG"
-string DOUBLE  = "DOUBLE"
-###string DATE    = "DATE"
-string STRING  = "STRING"
+string BOOLEAN = "boolean"
+string INTEGER = "integer"
+string DOUBLE  = "double"
+string STRING  = "string"
 #string FILE    = "FILE"
 #string OBJECT  = "OBJECT"
 
