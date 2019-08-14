@@ -102,14 +102,14 @@ class Service(object):
         if not isinstance(template, dict):
             raise TypeError("A non-object template was used in user_input()")
 
-        if isinstance(self.type, GetMessage):
-            return self.message_name_from_template(template)
+        # if isinstance(self.type, GetMessage):
+        #     return message_name_from_template(template)
 
         if isinstance(self.type, GetVariable):
-            return self.variable_name_from_template(template)
+            return variable_name_from_template(template)
 
         if isinstance(self.type, SetVariable):
-            return self.variable_from_template(template)
+            return variable_from_template(template)
 
         return fill_template(template)
 
