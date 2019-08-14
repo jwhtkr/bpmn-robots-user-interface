@@ -322,8 +322,9 @@ namespace behavior_ui
     {
       std::error_code error_code(0, std::generic_category());
 
-      this->message_handler.template sendMessage<camunda::Variables, camunda::Topics>(camunda::Variables(web::json::value::parse(req.variables, error_code)),
-                                                                                      camunda::Topics(req.message_name, 9999));
+      this->message_handler.template sendMessage<camunda::Variables>(req.message_name,
+                                                                     camunda::Variables(web::json::value::parse(req.variables, error_code)),
+                                                                     this->getInstanceId());
 
       if(0 != error_code.value())
       {
