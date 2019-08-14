@@ -42,19 +42,38 @@ def variable_name_from_template(template):
 
 def variable_from_template(template):
     """Gives the user a choice of templates to fill, or create a new one"""
-    var_name = variable_name_from_template(template)
-    var = template[var_name]
-    var_type = var[u'type']
-    prompt = "Enter a new value for the variable (Old value: {curr_val}): "
-    var_value = raw_input(prompt.format(curr_val=var[u'value']))
+    update = None
+    while update is None:
+        uinput = raw_input("Create new variable/update existing (n/u): ")
+        if uinput == 'n':
+            update = False
+        elif uinput == 'u':
+            update = True
+
+    if update:
+        var_name = variable_name_from_template(template)
+        var = template[var_name]
+        var_type = var[u'type']
+        prompt = "Enter a new value for the variable (Old value: {curr_val}): "
+        var_value = raw_input(prompt.format(curr_val=var[u'value']))
+    else:
+        var_name = raw_input("Enter variable name: ")
+        var_type = None
+        var_value = raw_input("Enter variable value: ")
 
     wrong_type = True
     while wrong_type:
         try:
-            var_value = JSON_TYPE_DICT[var_type](var_value)
-            wrong_type = False
-        except ValueError:
-            var_type = raw_input("Enter the new type for the variable: ")
+            var_py_type = JSON_TYPE_DICT[var_type]
+            if var_py_type is None:
+                wrong_type = False if var_value is None else True
+            else:
+                var_value = var_py_type(var_value)
+                wrong_type = False
+        except (ValueError, KeyError):
+            var_type = raw_input("Enter the type for the variable: ")
+    
+    
 
 
 def fill_template(template):
