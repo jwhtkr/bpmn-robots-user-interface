@@ -1,5 +1,9 @@
 #! /usr/bin/env python
-"""Module that holds the underlying class(es) for the user interface"""
+"""Module that holds the underlying classes for the user interface"""
+
+from __future__ import print_function
+
+from os import system
 
 import json
 import datetime
@@ -97,8 +101,9 @@ def fill_template(template):
         return ""
 
 
-class Service(object):
+class ServiceInterface(object):
     """Represents a service being offered by a behavior"""
+    # TODO: adjust this class to make calls to the UserInterface class for input
     srv_type_dict = {ServiceMessage.COMPLETE:       Complete,
                      ServiceMessage.GET_MESSAGE:    GetMessage,
                      ServiceMessage.GET_VARIABLE:   GetVariable,
@@ -109,7 +114,7 @@ class Service(object):
 
     def __init__(self, service):
         self.name = service.name
-        self.type = Service.srv_type_dict[service.type]
+        self.type = ServiceInterface.srv_type_dict[service.type]
         self.template = service.json_template
 
     def user_input(self):
@@ -138,3 +143,24 @@ class UserInterface(object):
     def __init__(self, context):
         self.context = context
         self.options = []  # list of active behaviors, each with a list of srvs
+
+    def set_options(self, options_list):
+        """Sets the options to the given list"""
+        self.options = options_list
+
+    def prompt(self, prompt="", clear_screen=False):  # pylint: disable=no-self-use
+        """Prompts the user for input and the option to clear the screen"""
+        if clear_screen:
+            system('clear')
+        return raw_input(prompt)
+
+    def show_options(self, clear_screen=False):
+        """Displays the behaviors that a user can interact with"""
+        beh_str = "{num}) {opt_name}"
+        if clear_screen:
+            system('clear')
+
+        for i, behavior in enumerate(self.options):
+            print(beh_str.format(num=i, opt_name=behavior))
+
+        print(beh_str.format(num=-1, opt_name="Exit"))
