@@ -19,6 +19,14 @@
 # Indicates the success of the operation
 ##
 
+## Possible value types
+string BOOLEAN = "boolean"
+string INTEGER = "integer"
+string DOUBLE  = "double"
+string STRING  = "string"
+#string FILE    = "FILE"
+#string OBJECT  = "OBJECT"
+
 string name
 string value
 string type
