@@ -206,41 +206,47 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::service_list_callback(interface_msgs::ServiceList::Request&,
                                                                         interface_msgs::ServiceList::Response& res)
   {
+    res.behavior_name = this->getName();
     res.services.reserve(6);
 
     if(ros::ServiceServer() != this->complete_srv)
     {
       res.services.emplace_back();
 
-      res.services.back().name = this->complete_srv.getService();
-      res.services.back().type = interface_msgs::Service::COMPLETE;
+      res.services.back().service_name = this->complete_srv.getService();
+      res.services.back().name         = "Complete";
+      res.services.back().type         = interface_msgs::Service::COMPLETE;
     }
     if(ros::ServiceServer() != this->throw_error_srv)
     {
       res.services.emplace_back();
 
-      res.services.back().name = this->throw_error_srv.getService();
-      res.services.back().type = interface_msgs::Service::THROW_ERROR;
+      res.services.back().service_name = this->throw_error_srv.getService();
+      res.services.back().name         = "Throw Error";
+      res.services.back().type         = interface_msgs::Service::THROW_ERROR;
     }
     if(ros::ServiceServer() != this->send_message_srv)
     {
       res.services.emplace_back();
 
-      res.services.back().name = this->send_message_srv.getService();
-      res.services.back().type = interface_msgs::Service::SEND_MESSAGE;
+      res.services.back().service_name = this->send_message_srv.getService();
+      res.services.back().name         = "Send Message";
+      res.services.back().type         = interface_msgs::Service::SEND_MESSAGE;
     }
     if(ros::ServiceServer() != this->send_signal_srv)
     {
       res.services.emplace_back();
 
-      res.services.back().name = this->send_signal_srv.getService();
-      res.services.back().type = interface_msgs::Service::SEND_SIGNAL;
+      res.services.back().service_name = this->send_signal_srv.getService();
+      res.services.back().name         = "Send Signal";
+      res.services.back().type         = interface_msgs::Service::SEND_SIGNAL;
     }
     if(ros::ServiceServer() != this->get_variable_srv)
     {
       res.services.emplace_back();
 
-      res.services.back().name          = this->get_variable_srv.getService();
+      res.services.back().service_name  = this->get_variable_srv.getService();
+      res.services.back().name          = "Get Variable";
       res.services.back().type          = interface_msgs::Service::GET_VARIABLE;
       res.services.back().json_template = this->task_lock.getResponsVars().serialize();
     }
@@ -248,7 +254,8 @@ namespace behavior_ui
     {
       res.services.emplace_back();
 
-      res.services.back().name          = this->set_variable_srv.getService();
+      res.services.back().service_name  = this->set_variable_srv.getService();
+      res.services.back().name          = "Set Variable";
       res.services.back().type          = interface_msgs::Service::SET_VARIABLE;
       res.services.back().json_template = this->task_lock.getResponsVars().serialize();
     }

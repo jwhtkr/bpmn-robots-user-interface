@@ -6,8 +6,11 @@
 # @Brief
 # This is a message that represents a service that is offered by a behavior to the UI
 #
-# @name
+# @service_name
 # The fully qualified name of the service (including full namespacing)
+#
+# @name
+# Name of the Camunda level action that will be performed via the ROS service
 #
 # @type
 # The type of service, as one of the values of the enum defined in the message
@@ -28,7 +31,8 @@ uint8 SET_VARIABLE = 2
 uint8 THROW_ERROR = 1
 uint8 NULL_TYPE = 0
 
+string service_name
 string name
-uint8 type
+uint8  type
 string json_template
 
