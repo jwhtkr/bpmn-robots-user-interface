@@ -16,12 +16,13 @@ from interface_msgs.srv import SendMessage, SendSignal, SetVariable, ThrowError 
 JSON_TYPE_DICT = {'boolean': bool,
                   'string':  str,
                   'integer': int,
-                  'long':    int,
-                  'float':   float,
-                  'double':  float,
-                  'null':    None,
-                  'bytes':   bytes,
-                  'date':    datetime.datetime}
+                #   'long':    int,
+                #   'float':   float,
+                  'double':  float
+                #   'null':    None,
+                #   'bytes':   bytes,
+                #   'date':    datetime.datetime
+                  }
 
 # def message_name_from_template(template):
 #     """Gives the user choices from the template of message names to get"""
@@ -40,7 +41,7 @@ def variable_name_from_template(template):
 
     value = ""
     while value not in template:
-        value = raw_input(prompt)
+        value = UserInterface.prompt(prompt)
 
     return value
 
@@ -48,7 +49,7 @@ def variable_from_template(template):
     """Gives the user a choice of templates to fill, or create a new one"""
     update = None
     while update is None:
-        uinput = raw_input("Create new variable/update existing (n/u): ")
+        uinput = UserInterface.prompt("Create new variable/update existing (n/u): ")
         if uinput == 'n':
             update = False
         elif uinput == 'u':
@@ -59,11 +60,11 @@ def variable_from_template(template):
         var = template[var_name]
         var_type = var[u'type']
         prompt = "Enter a new value for the variable (Old value: {curr_val}): "
-        var_value = raw_input(prompt.format(curr_val=var[u'value']))
+        var_value = UserInterface.prompt(prompt.format(curr_val=var[u'value']))
     else:
-        var_name = raw_input("Enter variable name: ")
+        var_name = UserInterface.prompt("Enter variable name: ")
         var_type = None
-        var_value = raw_input("Enter variable value: ")
+        var_value = UserInterface.prompt("Enter variable value: ")
 
     wrong_type = True
     while wrong_type:
@@ -75,9 +76,9 @@ def variable_from_template(template):
                 var_value = var_py_type(var_value)
                 wrong_type = False
         except (ValueError, KeyError):
-            var_type = raw_input("Enter the type for the variable: ")
-    
-    
+            var_type = UserInterface.prompt("Enter the type for the variable: ")
+
+    return {'name': var_name, 'value': var_value, 'type': var_type}
 
 
 def fill_template(template):
@@ -89,21 +90,20 @@ def fill_template(template):
     try:
         for var_name in template:
             item = template[var_name]
-            value = raw_input(prompt.format(name=var_name,
-                                            type=item[u'type'],
-                                            curr_val=item[u'value']))
+            value = UserInterface.prompt(prompt.format(name=var_name,
+                                                       type=item[u'type'],
+                                                       curr_val=item[u'value']))
 
             if value != '':
                 template[u'value'] = value
 
-        return json.dumps(template)
+        return json.dumps({'variables': template})
     except ValueError:
         return ""
 
 
 class ServiceInterface(object):
     """Represents a service being offered by a behavior"""
-    # TODO: adjust this class to make calls to the UserInterface class for input
     srv_type_dict = {ServiceMessage.COMPLETE:       Complete,
                      ServiceMessage.GET_MESSAGE:    GetMessage,
                      ServiceMessage.GET_VARIABLE:   GetVariable,
@@ -118,6 +118,11 @@ class ServiceInterface(object):
         self.template = service.json_template
 
     def user_input(self):
+        """Gets the needed user input based on the service type"""
+        if isinstance(self.type, (SendSignal, SendMessage)):
+            UserInterface.prompt("Enter the message/signal name: ")
+
+    def input_from_template(self):
         """Create a JSON string filled with user values based on the template"""
         try:
             template = json.loads(self.template)
@@ -138,29 +143,66 @@ class ServiceInterface(object):
         return fill_template(template)
 
 
+class BehaviorInterface(object):
+    """Represents a Behavior that is active"""
+    def __init__(self, behavior):
+        self.name = behavior.name
+        self.description = behavior.description
+        self.manager_status = behavior.managerStatus
+        self.behavior_status = behavior.behaviorStatus
+        self.services = []
+
+    def __repr__(self):
+        return "BehaviorInterface({}: {})".format(self.name, self.services)
+
+    def __str__(self):
+        return "{}:\n{}".format(self.name, self.description)
+
+    def set_services(self, services):
+        """Sets self.services to the list of services passed in as ROS msgs"""
+        self.services = []
+        for service in services:
+            self.services.append(ServiceInterface(service))
+
+
 class UserInterface(object):
     """Main class for the user interface"""
     def __init__(self, context):
         self.context = context
-        self.options = []  # list of active behaviors, each with a list of srvs
+        self.behaviors = []  # list of BehaviorInterfaces
 
-    def set_options(self, options_list):
-        """Sets the options to the given list"""
-        self.options = options_list
+    def set_behaviors(self, behavior_list):
+        """Sets the behaviors to the given list"""
+        self.behaviors = behavior_list
 
-    def prompt(self, prompt="", clear_screen=False):  # pylint: disable=no-self-use
+    @staticmethod
+    def prompt(prompt="", clear_screen=False):
         """Prompts the user for input and the option to clear the screen"""
         if clear_screen:
             system('clear')
         return raw_input(prompt)
 
-    def show_options(self, clear_screen=False):
+    def show_behaviors(self, clear_screen=False):
         """Displays the behaviors that a user can interact with"""
         beh_str = "{num}) {opt_name}"
         if clear_screen:
             system('clear')
 
-        for i, behavior in enumerate(self.options):
-            print(beh_str.format(num=i, opt_name=behavior))
+        for i, behavior in enumerate(self.behaviors):
+            print(beh_str.format(num=i, opt_name=behavior.name))
 
-        print(beh_str.format(num=-1, opt_name="Exit"))
+        print(beh_str.format(num=len(self.behaviors), opt_name="Refresh"))
+        print(beh_str.format(num=len(self.behaviors) + 1, opt_name="Exit"))
+
+    def show_services(self, beh_idx, clear_screen=False):
+        """Displays the services that a behavior has available"""
+        if clear_screen:
+            system('clear')
+
+        behavior = self.behaviors[beh_idx]
+        print(str(behavior))
+
+        for i, service in enumerate(behavior.services):
+            print("{num}) {srv_name}".format(num=i, srv_name=service.name))
+
+        print("{} Behavior List".format(len(behavior.services)))
