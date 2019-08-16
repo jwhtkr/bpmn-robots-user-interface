@@ -113,14 +113,31 @@ class ServiceInterface(object):
                      ServiceMessage.THROW_ERROR:    ThrowError}
 
     def __init__(self, service):
+        self.service_name = service.service_name
         self.name = service.name
         self.type = ServiceInterface.srv_type_dict[service.type]
         self.template = service.json_template
 
-    def user_input(self):
-        """Gets the needed user input based on the service type"""
-        if isinstance(self.type, (SendSignal, SendMessage)):
-            UserInterface.prompt("Enter the message/signal name: ")
+    def build_request(self):
+        """Builds the data for the service request, including any user input"""
+        print("Building {} request.".format(self.service_name))
+        print("Press Ctrl-C any time during request process to abort")
+        user_input = self.input_from_template()
+        
+        if isinstance(user_input, dict):
+            request = user_input
+        elif isinstance(self.type, GetVariable):
+            request = {'name': user_input}
+        else:
+            request = {'variables': user_input}
+            
+        if isinstance(self.type, (SendMessage, SendSignal)):
+            request['name'] = self.name
+        
+        if isinstance(self.type, ThrowError):
+            request['message'] = UserInterface.prompt('Enter Error Message: ')
+            
+        return request
 
     def input_from_template(self):
         """Create a JSON string filled with user values based on the template"""
@@ -194,15 +211,78 @@ class UserInterface(object):
         print(beh_str.format(num=len(self.behaviors), opt_name="Refresh"))
         print(beh_str.format(num=len(self.behaviors) + 1, opt_name="Exit"))
 
-    def show_services(self, beh_idx, clear_screen=False):
+    def show_services(self, behavior, clear_screen=False):
         """Displays the services that a behavior has available"""
         if clear_screen:
             system('clear')
 
-        behavior = self.behaviors[beh_idx]
         print(str(behavior))
 
         for i, service in enumerate(behavior.services):
             print("{num}) {srv_name}".format(num=i, srv_name=service.name))
 
         print("{} Behavior List".format(len(behavior.services)))
+        
+    def get_behavior_selection(self):
+        """Retrieve a behavior based on user input"""
+        self.show_behaviors()
+        beh_idx = self.prompt("Enter Selection Number: ")
+        try:
+            return self.behaviors[beh_idx], False
+        except KeyError:
+            if beh_idx == len(self.behaviors):
+                self.behaviors = self.context.get_behaviors()
+                return None, False
+        return None, True
+    
+    def get_service_selection(self, behavior):
+        """Retreive a service based on user input"""
+        self.show_services(behavior)
+        srv_idx = self.prompt("Enter Selection Number: ")
+        try:
+            return behavior.services[srv_idx], False
+        except KeyError:
+            pass
+        return None, True
+
+    def run(self):
+        """The main logic of the User Interface"""
+        exit = False
+        while not exit:
+            behavior, exit = self.get_behavior_selection()
+            
+            if behavior:
+                back = False
+                while not back:
+                    service, back = self.get_service_selection(behavior)
+                    
+                    if service:
+                        try:
+                            request = service.build_request()
+                            self.context.call(service.service_name, 
+                                              **request)
+                        except KeyboardInterrupt:
+                            pass
+                        except AttributeError:
+                            print("The UI was called from a context that has no"
+                                  + " call(srv_name, **request_args) function")
+                        
+if __name__ == "__main__":
+    from architecture_msgs.msg import BehaviorStatusResponse
+    beh_1 = BehaviorStatusResponse("beh_1", "beh_1_descr", 3, "beh_1_status")
+    beh_2 = BehaviorStatusResponse("beh_2", "beh_2_descr", 3, "beh_2_status")
+    
+    beh_1 = BehaviorInterface(beh_1)
+    beh_2 = BehaviorInterface(beh_2)
+    
+    variables = {'variables': {'var_1': {'value': 'default', 'type': 'string'}}}
+    srv_1 = ServiceMessage("srv_1", "Complete", 7, json.dumps(variables))
+    srv_2 = ServiceMessage("srv_2", "SendASignal", 3, json.dumps(variables))
+    
+    beh_1.set_services([srv_1, srv_2])
+    beh_2.set_services([srv_1, srv_2])
+    
+    context = None
+    ui = UserInterface(context)
+    ui.set_behaviors([beh_1, beh_2])
+    ui.run()
