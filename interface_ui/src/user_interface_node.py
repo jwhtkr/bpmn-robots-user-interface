@@ -6,7 +6,7 @@ from __future__ import print_function
 import rospy
 import rosservice
 
-from interface_ui.user_interface import UserInterface, BehaviorInterface
+from user_interface import UserInterface, BehaviorInterface
 from architecture_msgs.srv import BehaviorStatus  # pylint: disable=import-error
 from interface_msgs.srv import ServiceList, ServiceListResponse  # pylint: disable=import-error
 
