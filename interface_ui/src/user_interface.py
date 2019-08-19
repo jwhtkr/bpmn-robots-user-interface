@@ -9,7 +9,7 @@ import json
 # import datetime
 
 from interface_msgs.msg import Service as ServiceMessage  # pylint: disable=import-error
-from interface_msgs.srv import Complete, GetMessage, GetVariable  # pylint: disable=import-error
+from interface_msgs.srv import Complete, GetVariable  # pylint: disable=import-error
 from interface_msgs.srv import SendMessage, SendSignal, SetVariable, ThrowError  # pylint: disable=import-error
 
 # pylint: disable=bad-continuation
@@ -106,7 +106,7 @@ def fill_template(template):
 class ServiceInterface(object):
     """Represents a service being offered by a behavior"""
     srv_type_dict = {ServiceMessage.COMPLETE:       Complete,
-                     ServiceMessage.GET_MESSAGE:    GetMessage,
+                     #  ServiceMessage.GET_MESSAGE:    GetMessage,
                      ServiceMessage.GET_VARIABLE:   GetVariable,
                      ServiceMessage.SEND_MESSAGE:   SendMessage,
                      ServiceMessage.SEND_SIGNAL:    SendSignal,
@@ -248,7 +248,10 @@ class UserInterface(object):
         self.print_screen_infix()
 
         for i, service in enumerate(behavior.services):
-            print("{num}) {srv_name}".format(num=i, srv_name=(service.name + ' ' + service.service_name)))
+            print("{num}) {srv_name}".format(num=i,
+                                             srv_name=(service.name
+                                                       + ' '
+                                                       + service.service_name)))
 
         print("{}) Behavior List (prev. screen)".format(len(behavior.services)))
 
