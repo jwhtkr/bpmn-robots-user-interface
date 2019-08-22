@@ -299,15 +299,22 @@ namespace behavior_ui
   {
     try
     {
-      std::error_code error_code(0, std::generic_category());
-
-      this->error_handler.throwBpmnError(req.message,
-                                         std::string(),
-                                         camunda::Variables(web::json::value::parse(req.variables, error_code)));
-
-      if(0 != error_code.value())
+      if(std::string() != req.variables)
       {
-        ROS_ERROR("Error Json for %s is incorrectly formatted.", this->getName().c_str());
+        std::error_code error_code(0, std::generic_category());
+
+        this->error_handler.throwBpmnError(req.message,
+                                           std::string(),
+                                           camunda::Variables(web::json::value::parse(req.variables, error_code)));
+
+        if(0 != error_code.value())
+        {
+          ROS_ERROR("Error Json for %s is incorrectly formatted.", this->getName().c_str());
+        }
+      }
+      else
+      {
+        this->error_handler.throwBpmnError(req.message, std::string());
       }
     }
     catch(const std::exception& ex)
@@ -327,15 +334,23 @@ namespace behavior_ui
   {
     try
     {
-      std::error_code error_code(0, std::generic_category());
-
-      this->message_handler.template sendMessage<camunda::Variables>(req.message_name,
-                                                                     camunda::Variables(web::json::value::parse(req.variables, error_code)),
-                                                                     this->getInstanceId());
-
-      if(0 != error_code.value())
+      if(std::string != req.variables)
       {
-        ROS_ERROR("Message Json for %s is incorrectly formatted.", this->getName().c_str());
+        std::error_code error_code(0, std::generic_category());
+
+        this->message_handler.template sendMessage<camunda::Variables>(req.message_name,
+                                                                       camunda::Variables(web::json::value::parse(req.variables, error_code)),
+                                                                       this->getInstanceId());
+        if(0 != error_code.value())
+        {
+          ROS_ERROR("Message Json for %s is incorrectly formatted.", this->getName().c_str());
+        }
+      }
+      else
+      {
+         this->message_handler.template sendMessage<camunda::Variables>(req.message_name,
+                                                                       camunda::Variables(),
+                                                                       this->getInstanceId());
       }
     }
     catch(const std::exception& ex)
@@ -355,13 +370,20 @@ namespace behavior_ui
   {
     try
     {
-      std::error_code error_code(0, std::generic_category());
-
-      this->message_handler.template throwSignal<camunda::ThrowSignal>(camunda::ThrowSignal(req.name, camunda::Variables(web::json::value::parse(req.variables, error_code))));
-
-      if(0 != error_code.value())
+      if(std::string() != req.variables)
       {
-        ROS_ERROR("Signal Json for %s is incorrectly formatted.", this->getName().c_str());
+        std::error_code error_code(0, std::generic_category());
+
+        this->message_handler.template throwSignal<camunda::ThrowSignal>(camunda::ThrowSignal(req.name, camunda::Variables(web::json::value::parse(req.variables, error_code))));
+
+        if(0 != error_code.value())
+        {
+          ROS_ERROR("Signal Json for %s is incorrectly formatted.", this->getName().c_str());
+        }
+      }
+      else
+      {
+        this->message_handler.template throwSignal<camunda::ThrowSignal>(camunda::ThrowSignal(req.name, camunda::Variables()));
       }
     }
     catch(const std::exception& ex)
