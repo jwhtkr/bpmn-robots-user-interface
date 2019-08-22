@@ -303,8 +303,8 @@ namespace behavior_ui
       {
         std::error_code error_code(0, std::generic_category());
 
-        this->error_handler.throwBpmnError(req.message,
-                                           std::string(),
+        this->error_handler.throwBpmnError(std::string("42"),
+                                           req.message,
                                            camunda::Variables(web::json::value::parse(req.variables, error_code)));
 
         if(0 != error_code.value())
@@ -314,7 +314,7 @@ namespace behavior_ui
       }
       else
       {
-        this->error_handler.throwBpmnError(req.message, std::string());
+        this->error_handler.throwBpmnError(std::string("42"), req.message);
       }
     }
     catch(const std::exception& ex)
