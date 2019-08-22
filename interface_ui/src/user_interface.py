@@ -126,19 +126,20 @@ class ServiceInterface(object):
         print("Building {} request.".format(self.service_name))
         print("Press Ctrl-C any time during request process to abort")
         UserInterface.print_screen_infix()
+
         user_input = self.input_from_template()
 
         if isinstance(user_input, dict):
             request = user_input
-        elif isinstance(self.type, GetVariable):
+        elif self.type is GetVariable:
             request = {'name': user_input}
         else:
             request = {"variables": user_input}
 
-        if isinstance(self.type, (SendMessage, SendSignal)):
+        if self.type is SendMessage or self.type is SendSignal:
             request['name'] = self.name
 
-        if isinstance(self.type, ThrowError):
+        if self.type is ThrowError:
             request['message'] = UserInterface.prompt('Enter Error Message: ')
 
         return request
@@ -152,13 +153,13 @@ class ServiceInterface(object):
         if not isinstance(template, dict):
             raise TypeError("A non-object template was used in user_input()")
 
-        # if isinstance(self.type, GetMessage):
+        # if self.type is GetMessage:
         #     return message_name_from_template(template)
 
-        if isinstance(self.type, GetVariable):
+        if self.type is GetVariable:
             return variable_name_from_template(template)
 
-        if isinstance(self.type, SetVariable):
+        if self.type is SetVariable:
             return variable_from_template(template)
 
         return fill_template(template)
@@ -269,6 +270,7 @@ class UserInterface(object):
 
     def get_service_selection(self, behavior):
         """Retreive a service based on user input"""
+        # TODO: Refresh service list that also goes back if behavior is gone
         self.show_services(behavior)
         srv_idx = int(self.prompt("Enter Selection Number: "))
         try:

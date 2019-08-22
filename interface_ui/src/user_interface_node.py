@@ -23,12 +23,14 @@ class UserInterfaceNode(object):
             service_name = '/' + service_name
         srv_class = rosservice.get_service_class_by_name(service_name)
         func = rospy.ServiceProxy(service_name, srv_class)
+        # rospy.loginfo("Calling %s with args %s", func, service_args)
         return func(**service_args)
 
     def get_behaviors(self):
         """Gets the list of behaivors, constructs them, and gets their srvs"""
         behaviors = []
 
+        # TODO: parse through rosservice_list return instead
         beh_status_srvs = rosservice.rosservice_find(BehaviorStatus._type)  # pylint: disable=protected-access
         for srv_name in beh_status_srvs:
             func = rospy.ServiceProxy(srv_name, BehaviorStatus)
