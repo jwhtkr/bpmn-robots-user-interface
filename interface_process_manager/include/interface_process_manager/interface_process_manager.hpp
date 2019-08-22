@@ -334,7 +334,7 @@ namespace behavior_ui
   {
     try
     {
-      if(std::string != req.variables)
+      if(std::string() != req.variables)
       {
         std::error_code error_code(0, std::generic_category());
 
