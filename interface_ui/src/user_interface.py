@@ -179,6 +179,17 @@ class BehaviorInterface(object):
 
     def __str__(self):
         return "{}:\n{}".format(self.name, self.description)
+    
+    def __eq__(self, other):
+        if isinstance(self, type(other)):
+            return self.name == other.name
+        return NotImplemented
+    
+    def __ne__(self, other):
+        x = self.__eq__(other)
+        if x is not NotImplemented:
+            return not x
+        return NotImplemented
 
     def set_services(self, service_list_msg):
         """Sets self.services to the list of services passed in as ROS msgs"""
@@ -254,29 +265,36 @@ class UserInterface(object):
                                                        + ' '
                                                        + service.service_name)))
 
-        print("{}) Behavior List (prev. screen)".format(len(behavior.services)))
+        print("{}) Refresh Services".format(len(behavior.services)))
+        print("{}) Behavior List (prev. screen)".format(len(behavior.services) 
+                                                        + 1))
 
     def get_behavior_selection(self):
         """Retrieve a behavior based on user input"""
         self.show_behaviors()
-        beh_idx = int(self.prompt("Enter Selection Number: "))
         try:
+            beh_idx = int(self.prompt("Enter Selection Number: "))
             return self.behaviors[beh_idx], False
         except IndexError:
             if beh_idx == len(self.behaviors):
                 self.set_behaviors(self.context.get_behaviors())
                 return None, False
+        except ValueError:
+            print("Please enter a valid integer selection value")
+            return None, False
         return None, True
 
     def get_service_selection(self, behavior):
         """Retreive a service based on user input"""
         # TODO: Refresh service list that also goes back if behavior is gone
         self.show_services(behavior)
-        srv_idx = int(self.prompt("Enter Selection Number: "))
         try:
+            srv_idx = int(self.prompt("Enter Selection Number: "))
             return behavior.services[srv_idx], False
         except IndexError:
-            pass
+            if srv_idx == len(behavior.services):
+                self.set_behaviors(self.context.get_behaviors())
+                return None, False
         return None, True
 
     def run(self):
@@ -301,6 +319,8 @@ class UserInterface(object):
                         except AttributeError:
                             print("The UI was called from a context that has no"
                                   + " call(srv_name, **request_args) function")
+                    elif behavior not in self.behaviors:
+                        back = True
 
 if __name__ == "__main__":
     from architecture_msgs.srv import BehaviorStatusResponse  # pylint: disable=import-error
