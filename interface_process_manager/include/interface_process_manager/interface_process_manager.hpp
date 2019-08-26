@@ -50,6 +50,8 @@
 #include<utility>
 #include<system_error>
 
+#define DEBUG_UI false
+
 namespace behavior_ui
 {
   template<typename TASK_LOCK = bpmn::TaskLock<>, typename ERROR = bpmn::ErrorHandler<>>
@@ -267,11 +269,15 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::complete_callback(interface_msgs::Complete::Request&  req,
                                                                     interface_msgs::Complete::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("complete_callback.\nreq:\n" << req);
+    #endif
+
     if(std::string() != req.variables)
     {
       std::error_code error_code(0, std::generic_category());
 
-      this->task_lock.addVariables(camunda::Variables(web::json::value::parse(req.variables, error_code)));
+      this->task_lock.addVariables(camunda::Variables(web::json::value::parse(req.variables, error_code).at("variables")));
       if(0 != error_code.value())
       {
         ROS_ERROR("Complete Json for %s is incorrectly formatted.", this->getName().c_str());
@@ -297,6 +303,10 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::throw_error_callback(interface_msgs::ThrowError::Request&  req,
                                                                        interface_msgs::ThrowError::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("throw_error_callback.\nreq:\n" << req);
+    #endif
+
     try
     {
       if(std::string() != req.variables)
@@ -305,7 +315,7 @@ namespace behavior_ui
 
         this->error_handler.throwBpmnError(std::string("42"),
                                            req.message,
-                                           camunda::Variables(web::json::value::parse(req.variables, error_code)));
+                                           camunda::Variables(web::json::value::parse(req.variables, error_code).at("variables")));
 
         if(0 != error_code.value())
         {
@@ -332,6 +342,10 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::send_message_callback(interface_msgs::SendMessage::Request&  req,
                                                                         interface_msgs::SendMessage::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("send_signal_callback.\nreq:\n" << req);
+    #endif
+
     try
     {
       if(std::string() != req.variables)
@@ -339,7 +353,7 @@ namespace behavior_ui
         std::error_code error_code(0, std::generic_category());
 
         this->message_handler.template sendMessage<camunda::Variables>(req.message_name,
-                                                                       camunda::Variables(web::json::value::parse(req.variables, error_code)),
+                                                                       camunda::Variables(web::json::value::parse(req.variables, error_code).at("variables")),
                                                                        this->getInstanceId());
         if(0 != error_code.value())
         {
@@ -368,13 +382,17 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::send_signal_callback(interface_msgs::SendSignal::Request&  req,
                                                                        interface_msgs::SendSignal::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("send_signal_callback.\nreq:\n" << req);
+    #endif
+
     try
     {
       if(std::string() != req.variables)
       {
         std::error_code error_code(0, std::generic_category());
 
-        this->message_handler.template throwSignal<camunda::ThrowSignal>(camunda::ThrowSignal(req.name, camunda::Variables(web::json::value::parse(req.variables, error_code))));
+        this->message_handler.template throwSignal<camunda::ThrowSignal>(camunda::ThrowSignal(req.name, camunda::Variables(web::json::value::parse(req.variables, error_code).at("variables"))));
 
         if(0 != error_code.value())
         {
@@ -401,6 +419,10 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::get_variable_callback(interface_msgs::GetVariable::Request&  req,
                                                                         interface_msgs::GetVariable::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("get_variable_callback.\nreq:\n" << req);
+    #endif
+
     try
     {
       res.variable = this->task_lock.getResponsVars().at(req.name).serialize();
@@ -416,6 +438,10 @@ namespace behavior_ui
   bool InterfaceProcessManager<TASK_LOCK, ERROR>::set_variable_callback(interface_msgs::SetVariable::Request&  req,
                                                                         interface_msgs::SetVariable::Response& res)
   {
+    #if DEBUG_UI
+    ROS_ERROR_STREAM("set_variable_callback.\nreq:\n" << req);
+    #endif
+
     try
     {
       if(interface_msgs::SetVariable::Request::STRING == req.type)
