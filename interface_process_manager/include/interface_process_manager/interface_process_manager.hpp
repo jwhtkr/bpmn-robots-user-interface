@@ -31,10 +31,7 @@
 #include<camunda_c_api/camunda_c_api.hpp>
 
 /* BPMN Interface Headers */
-#include<bpmn_interface/task_lock.hpp>
-#include<bpmn_interface/error_handler.hpp>
-#include<bpmn_interface/message_handler.hpp>
-#include<bpmn_interface/process_variable.hpp>
+#include<bpmn_interface/bpmn_interface.hpp>
 
 /* Rest Headers */
 #include<cpprest/json.h>

@@ -40,7 +40,7 @@ catkin_package(
     architecture_msgs
     interface_msgs
   DEPENDS
-    cpprestsdk
+    cpprestsdk::cpprest
 )
 
 ###########
