@@ -10,12 +10,9 @@ find_package(catkin REQUIRED
   # Architecture Packages
     behavior_manager
   # BPMN Interface Packages
-    task_lock
-    error_handler
-    message_handler
-    process_variables
+    bpmn_interface
   # Camunda API Packages
-    camunda_objects
+    camunda_c_api
   # Message Packages
     architecture_msgs
     interface_msgs
@@ -36,12 +33,9 @@ catkin_package(
   # Architecture Packages
     behavior_manager
   # BPMN Interface Packages
-    task_lock
-    error_handler
-    message_handler
-    process_variables
+    bpmn_interface
   # Camunda API Packages
-    camunda_objects
+    camunda_c_api
   # Message Packages
     architecture_msgs
     interface_msgs

@@ -13,12 +13,9 @@
   <!-- Architecture Packages -->
   <depend>behavior_manager</depend>
   <!-- BPMN Interface Packages -->
-  <depend>task_lock</depend>
-  <depend>error_handler</depend>
-  <depend>message_handler</depend>
-  <depend>process_variables</depend>
+  <depend>bpmn_interface</depend>
   <!-- Camunda API Packages -->
-  <depend>camunda_objects</depend>
+  <depend>camunda_c_api</depend>
   <!-- Message Packages -->
   <depend>architecture_msgs</depend>
   <depend>interface_msgs</depend>
