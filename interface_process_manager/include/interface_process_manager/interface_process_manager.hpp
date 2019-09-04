@@ -28,15 +28,10 @@
 #include<behavior_manager/behavior_manager.hpp>
 
 /* Camunda C++ API Headers */
-#include<camunda_objects/topics.hpp>
-#include<camunda_objects/throw_signal.hpp>
-#include<camunda_objects/variables.hpp>
+#include<camunda_c_api/camunda_c_api.hpp>
 
 /* BPMN Interface Headers */
-#include<task_lock/task_lock.hpp>
-#include<error_handler/error_handler.hpp>
-#include<message_handler/message_handler.hpp>
-#include<process_variables/process_variable.hpp>
+#include<bpmn_interface/bpmn_interface.hpp>
 
 /* Rest Headers */
 #include<cpprest/json.h>
