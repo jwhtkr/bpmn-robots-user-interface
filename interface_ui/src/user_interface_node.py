@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""Module conatians the ROS node for the User Interface"""
+"""Module conatians the ROS node for the User Interface."""
 
 from __future__ import print_function
 
@@ -12,13 +12,14 @@ from interface_msgs.srv import ServiceList, ServiceListResponse  # pylint: disab
 
 
 class UserInterfaceNode(object):
-    """The ROS node class for the user interface"""
+    """The ROS node class for the user interface."""
+
     def __init__(self):
         rospy.init_node('user_interface')
 
     @staticmethod
     def call(service_name, **service_args):
-        """Calls the service_name srv, with service_args"""
+        """Call the service_name srv, with service_args."""
         if service_name[0] != '/':
             service_name = '/' + service_name
         srv_class = rosservice.get_service_class_by_name(service_name)
@@ -27,7 +28,7 @@ class UserInterfaceNode(object):
         return func(**service_args)
 
     def get_behaviors(self):
-        """Gets the list of behaivors, constructs them, and gets their srvs"""
+        """Get the list of behaivors, constructs them, and gets their srvs."""
         behaviors = []
 
         # TODO: parse through rosservice_list return instead
@@ -42,7 +43,7 @@ class UserInterfaceNode(object):
         return behaviors
 
     def get_services(self, behavior_node):  # pylint: disable=no-self-use
-        """Gets a list of services of a behavior and returns them"""
+        """Get a list of services of a behavior and returns them."""
         node_srvs = rosservice.get_service_list(node=behavior_node)
         srv_list_name = None
         for srv in node_srvs:
@@ -56,7 +57,7 @@ class UserInterfaceNode(object):
         return ServiceListResponse(behavior_name="", services=[])
 
     def run(self):
-        """The main method of the node"""
+        """Main method of the node."""
         user_interface = UserInterface(self)
         user_interface.set_behaviors(self.get_behaviors())
         user_interface.run()

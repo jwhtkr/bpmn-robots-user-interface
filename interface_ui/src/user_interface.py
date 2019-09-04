@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""Module that holds the underlying classes for the user interface"""
+"""Module that holds the underlying classes for the user interface."""
 
 from __future__ import print_function
 
@@ -30,7 +30,7 @@ JSON_TYPE_DICT = {'boolean': bool,
 #     pass
 
 def variable_name_from_template(template):
-    """Gives the user choices from the template of variable names to get"""
+    """Give the user choices from the template of variable names to get."""
     prompt = []
 
     template = template.get(u'variables', template)
@@ -47,7 +47,7 @@ def variable_name_from_template(template):
     return value
 
 def variable_from_template(template):
-    """Gives the user a choice of templates to fill, or create a new one"""
+    """Give the user a choice of templates to fill, or create a new one."""
     update = None
     while update is None:
         val = UserInterface.prompt("Create new variable/update existing(n/u): ")
@@ -83,7 +83,7 @@ def variable_from_template(template):
 
 
 def fill_template(template):
-    """Allows the user to fill values, or use defaults, based on template"""
+    """Allow the user to fill values, or use defaults, based on template."""
     prompt = "Enter a value for {name}({type}) or "\
         + "press enter for the default value({curr_val}): "
 
@@ -104,7 +104,8 @@ def fill_template(template):
 
 
 class ServiceInterface(object):
-    """Represents a service being offered by a behavior"""
+    """Represent a service being offered by a behavior."""
+
     srv_type_dict = {ServiceMessage.COMPLETE:       Complete,
                      #  ServiceMessage.GET_MESSAGE:    GetMessage,
                      ServiceMessage.GET_VARIABLE:   GetVariable,
@@ -120,7 +121,7 @@ class ServiceInterface(object):
         self.template = service.json_template
 
     def build_request(self):
-        """Builds the data for the service request, including any user input"""
+        """Build the data for the service request, including any user input."""
         UserInterface.print_next_screen_prefix()
         UserInterface.clear_screen(UserInterface.CLEAR_SCREEN)
         print("Building {} request.".format(self.service_name))
@@ -145,7 +146,7 @@ class ServiceInterface(object):
         return request
 
     def input_from_template(self):
-        """Create a JSON string filled with user values based on the template"""
+        """Create a JSON string filled with user values based on the template."""
         try:
             template = json.loads(self.template)
         except ValueError:
@@ -166,7 +167,8 @@ class ServiceInterface(object):
 
 
 class BehaviorInterface(object):
-    """Represents a Behavior that is active"""
+    """Represent a Behavior that is active."""
+
     def __init__(self, behavior):
         self.name = behavior.name
         self.description = behavior.description
@@ -192,7 +194,7 @@ class BehaviorInterface(object):
         return NotImplemented
 
     def set_services(self, service_list_msg):
-        """Sets self.services to the list of services passed in as ROS msgs"""
+        """Set self.services to the list of services passed in as ROS msgs."""
         if service_list_msg.behavior_name != self.name \
             and service_list_msg.behavior_name != '':
             raise ValueError("The behavior names didn't match")
@@ -204,7 +206,8 @@ class BehaviorInterface(object):
 
 
 class UserInterface(object):
-    """Main class for the user interface"""
+    """Main class for the user interface."""
+
     CLEAR_SCREEN = False
     def __init__(self, context):
         self.context = context
@@ -212,34 +215,34 @@ class UserInterface(object):
         self.clear_screen(True)
 
     def set_behaviors(self, behavior_list):
-        """Sets the behaviors to the given list"""
+        """Set the behaviors to the given list."""
         self.behaviors = behavior_list
 
     @staticmethod
     def prompt(prompt="", clear_screen=False):
-        """Prompts the user for input and the option to clear the screen"""
+        """Prompt the user for input and the option to clear the screen."""
         UserInterface.clear_screen(clear_screen)
         return raw_input(prompt)
 
     @staticmethod
     def clear_screen(clear_screen):
-        """Clears the screen if clear_screen is true"""
+        """Clear the screen if clear_screen is true."""
         if clear_screen:
             system('clear')
 
     @staticmethod
     def print_next_screen_prefix():
-        """Prints symbols to help visually separate screens if not clearing"""
+        """Print symbols to help visually separate screens if not clearing."""
         print()
         print("*****************************")
 
     @staticmethod
     def print_screen_infix():
-        """Prints symbols to visually separate header info from other info"""
+        """Print symbols to visually separate header info from other info."""
         print("*****************************")
 
     def show_behaviors(self, clear_screen=CLEAR_SCREEN):
-        """Displays the behaviors that a user can interact with"""
+        """Display the behaviors that a user can interact with."""
         beh_str = "{num}) {opt_name}"
 
         self.print_next_screen_prefix()
@@ -253,7 +256,7 @@ class UserInterface(object):
         print(beh_str.format(num=len(self.behaviors) + 1, opt_name="Exit UI"))
 
     def show_services(self, behavior, clear_screen=CLEAR_SCREEN):
-        """Displays the services that a behavior has available"""
+        """Display the services that a behavior has available."""
         self.print_next_screen_prefix()
         self.clear_screen(clear_screen)
         print(str(behavior))
@@ -270,7 +273,7 @@ class UserInterface(object):
                                                         + 1))
 
     def get_behavior_selection(self):
-        """Retrieve a behavior based on user input"""
+        """Retrieve a behavior based on user input."""
         self.show_behaviors()
         try:
             beh_idx = int(self.prompt("Enter Selection Number: "))
@@ -285,7 +288,7 @@ class UserInterface(object):
         return None, True
 
     def get_service_selection(self, behavior):
-        """Retreive a service based on user input"""
+        """Retreive a service based on user input."""
         # TODO: Refresh service list that also goes back if behavior is gone
         self.show_services(behavior)
         try:
@@ -298,7 +301,7 @@ class UserInterface(object):
         return None, True
 
     def run(self):
-        """The main logic of the User Interface"""
+        """The main logic of the User Interface."""
         done = False
         while not done:
             behavior, done = self.get_behavior_selection()
