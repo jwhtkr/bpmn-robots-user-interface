@@ -5,3 +5,5 @@ graphical_ui/gui/main.pyproject
 graphical_ui/gui/main.pyproject.user
 interface_ui/src/test.py
 
+graphical_ui/src/main.pyproject
+graphical_ui/src/main.pyproject.user
