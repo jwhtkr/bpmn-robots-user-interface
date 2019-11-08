@@ -1,5 +1,6 @@
 import sys
 import os
+import rospy
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from Ui_main_window import Ui_GUI
@@ -9,6 +10,7 @@ class GuiMainWindow(QtWidgets.QMainWindow, Ui_GUI):
     """Class to setup GUI widgets and connect them."""
     def __init__(self):
         super(GuiMainWindow, self).__init__()
+        rospy.init_node("GUI_Node")
         self.setupUi(self)
         self.mainStackedWidget.setCurrentIndex(0)
         self.fileSelectButton.clicked.connect(self.select_file)
