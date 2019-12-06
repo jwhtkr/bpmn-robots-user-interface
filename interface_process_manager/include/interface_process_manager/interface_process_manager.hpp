@@ -26,6 +26,7 @@
 
 /* Behavior Manager Headers */
 #include<behavior_manager/behavior_manager.hpp>
+#include<behavior_manager/resource_pool.hpp>
 
 /* Camunda C++ API Headers */
 #include<camunda_c_api/camunda_c_api.hpp>
@@ -74,35 +75,18 @@ namespace behavior_ui
      * resources, as well as setup all base ROS connections and configure the ErrorHandler it
      * holds. The only other thing that this constructor does is initialize it's local
      * MessageHandler object.
-     * @base_uri: The URI of the camunda server
-     * @name: The string that will used to denote this behavior
-     * @camunda_topic: The camunda topic that this object will attempt to fetch and lock from
-     * @status_topic: ROS topic of a service that provides status updates from this object
-     * @get_resources_topic: ROS service topic that this object will use to ask the Resource
-     *                       Manager for resources
-     * @give_resources_topic: ROS service topic that this object will use to give the Resource
-     *                        Manager resources it's not using anymore
-     * @give_up_resources_topic: ROS service topic that the Resource Manager will use to take
-     *                           resources back from this object
-     * @modify_robots_topic: ROS service topic that this object will use to tell the Thread
-     *                       Pool Manager what resources to spin-up
-     * @config_file_path: The absolute path of this behavior's config file
-     * @variables: The variables you want to get in the fetch and lock. If left blank
-     *             Camunda will return all of the global variables
-     * @managing_rate: The frequency that this object will attempt to run all of its
-     *                 duties at least once
      **/
-    InterfaceProcessManager(const std::string&              base_uri,
-                            const std::string&              name,
-                            const std::string&              camunda_topic,
-                            const std::string&              status_topic,
-                            const std::string&              get_resources_topic,
-                            const std::string&              give_resources_topic,
-                            const std::string&              give_up_resources_topic,
-                            const std::string&              modify_robots_topic,
-                            const std::string&              config_file_path,
-                            const std::vector<std::string>& variables     = std::vector<std::string>(),
-                            const uint32_t                  managing_rate = 30);
+    InterfaceProcessManager(const std::string&                    base_uri,
+                            const std::string&                    name,
+                            const std::string&                    camunda_topic,
+                            const std::string&                    status_topic,
+                            const std::string&                    get_resources_topic,
+                            const std::string&                    give_resources_topic,
+                            const std::string&                    give_up_resources_topic,
+                            const std::string&                    modify_robots_topic,
+                            const behavior_manager::ResourcePool& resources_template,
+                            const std::vector<std::string>&       variables     = std::vector<std::string>(),
+                            const uint32_t                        managing_rate = 30);
     /**
      * @Deconstructor
      **/
@@ -167,17 +151,17 @@ namespace behavior_ui
   };
 
   template<typename TASK_LOCK, typename ERROR>
-  InterfaceProcessManager<TASK_LOCK, ERROR>::InterfaceProcessManager(const std::string&              base_uri,
-                                                                     const std::string&              name,
-                                                                     const std::string&              camunda_topic,
-                                                                     const std::string&              status_topic,
-                                                                     const std::string&              get_resources_topic,
-                                                                     const std::string&              give_resources_topic,
-                                                                     const std::string&              give_up_resources_topic,
-                                                                     const std::string&              modify_robots_topic,
-                                                                     const std::string&              config_file_path,
-                                                                     const std::vector<std::string>& variables,
-                                                                     const uint32_t                  managing_rate)
+  InterfaceProcessManager<TASK_LOCK, ERROR>::InterfaceProcessManager(const std::string&                    base_uri,
+                                                                     const std::string&                    name,
+                                                                     const std::string&                    camunda_topic,
+                                                                     const std::string&                    status_topic,
+                                                                     const std::string&                    get_resources_topic,
+                                                                     const std::string&                    give_resources_topic,
+                                                                     const std::string&                    give_up_resources_topic,
+                                                                     const std::string&                    modify_robots_topic,
+                                                                     const behavior_manager::ResourcePool& resources_template,
+                                                                     const std::vector<std::string>&       variables,
+                                                                     const uint32_t                        managing_rate)
    : behavior_manager::BehaviorManager<TASK_LOCK, ERROR>(base_uri,
                                                          name,
                                                          camunda_topic,
@@ -186,7 +170,7 @@ namespace behavior_ui
                                                          give_resources_topic,
                                                          give_up_resources_topic,
                                                          modify_robots_topic,
-                                                         config_file_path,
+                                                         resources_template,
                                                          variables,
                                                          managing_rate),
    message_handler(web::json::value(base_uri), behavior_manager::BehaviorManager<TASK_LOCK, ERROR>::task_lock.getWorkerId())
